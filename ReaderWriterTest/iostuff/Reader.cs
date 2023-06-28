@@ -482,7 +482,7 @@ namespace ReaderWriterTest.iostuff
             convertBytes = ExtractBytes(8, reverse);
 
             // unrap value to return
-            double returnValue = BitConverter.ToUInt16(convertBytes, 0);
+            double returnValue = BitConverter.ToDouble(convertBytes, 0);
 
             return returnValue;
         }
@@ -498,7 +498,7 @@ namespace ReaderWriterTest.iostuff
             convertBytes = ExtractBytes(8, reverse);
 
             // unrap value to return
-            ulong returnValue = BitConverter.ToUInt16(convertBytes, 0);
+            ulong returnValue = BitConverter.ToUInt64(convertBytes, 0);
 
             return returnValue;
         }
@@ -514,7 +514,7 @@ namespace ReaderWriterTest.iostuff
             convertBytes = ExtractBytes(8, reverse);
 
             // unrap value to return
-            long returnValue = BitConverter.ToUInt16(convertBytes, 0);
+            long returnValue = BitConverter.ToInt64(convertBytes, 0);
 
             return returnValue;
         }
@@ -545,7 +545,7 @@ namespace ReaderWriterTest.iostuff
             convertBytes = ExtractBytes(4, reverse);
 
             // unrap value to return
-            uint returnValue = BitConverter.ToUInt16(convertBytes, 0);
+            uint returnValue = BitConverter.ToUInt32(convertBytes, 0);
 
             return returnValue;
         }
@@ -561,7 +561,7 @@ namespace ReaderWriterTest.iostuff
             convertBytes = ExtractBytes(4, reverse);
 
             // unrap value to return
-            int returnValue = BitConverter.ToUInt16(convertBytes, 0);
+            int returnValue = BitConverter.ToInt32(convertBytes, 0);
 
             return returnValue;
         }
