@@ -19,7 +19,11 @@ namespace ReaderWriterTest.iostuff
         // name of file
         private string fileName;
         // stores if file is reading in little endian or not
-        private bool littleEndian;     
+        private bool littleEndian;
+        // the check byte stream used if a portion of the file is needed
+        private List<byte> checkByteStream;
+        // add bytes to check byte stream if true
+        private bool buildingCheckByteStream;
         // sotres currently read bytes
         private byte[] convertBytes;
         // stores the position in the file
@@ -95,7 +99,51 @@ namespace ReaderWriterTest.iostuff
             reverse = (SYSTEM_LITTLE_ENDIEN != littleEndian);
         }
 
-        
+        /// <summary>
+        /// Starts saving a check byte stream that can be used for CRC or other
+        /// checks.
+        /// </summary>
+        public void BuildCheckByteStream()
+        {
+            buildingCheckByteStream = true;
+            checkByteStream = new List<byte>();
+        }
+
+        /// <summary>
+        /// Gets the check byte stream that has been saved.
+        /// </summary>
+        /// <param name="length">The length of string to read.</param>
+        /// <returns>the check byte stream.</returns>
+        public byte[] GetCheckByteStream()
+        {
+
+            // byte arrary
+            byte[] returnByteStream = new byte[checkByteStream.Count()];
+
+            // build loop
+            for (int i = 0; i < returnByteStream.Length; i++)
+            {
+                returnByteStream[i] = checkByteStream.ElementAt(i);
+            }
+
+            return returnByteStream;
+        }
+
+        /// <summary>
+        /// Resets the check byte stream.
+        /// </summary>
+        public void ResetCheckByteStream()
+        {
+            checkByteStream = new List<byte>();
+        }
+
+        /// <summary>
+        /// End the check byte stream.
+        /// </summary>
+        public void EndCheckByteStream()
+        {
+            buildingCheckByteStream = false;
+        }
 
         /// <summary>
         /// Reads byte string from file.
@@ -652,6 +700,12 @@ namespace ReaderWriterTest.iostuff
             // get byte
             byte convertedByte = binaryReader.ReadByte();
 
+            // append byte to check byte stream
+            if (buildingCheckByteStream && checkByteStream != null)
+            {
+                checkByteStream.Add(convertedByte);
+            }
+
             // increment file position
             filePosition++;
 
@@ -674,6 +728,12 @@ namespace ReaderWriterTest.iostuff
 
             // get byte
             sbyte convertedByte = binaryReader.ReadSByte();
+
+            // append byte to check byte stream
+            if (buildingCheckByteStream && checkByteStream != null)
+            {
+                checkByteStream.Add((byte)convertedByte);
+            }
 
             // increment file position
             filePosition++;
@@ -721,6 +781,15 @@ namespace ReaderWriterTest.iostuff
             // extract bytes
             binaryReader.Read(extractedBytes, 0, bytesToExtract);
 
+            // append bytes to check byte stream
+            if (buildingCheckByteStream && checkByteStream != null)
+            {
+                for (int i = 0; i < extractedBytes.Length; i++)
+                {
+                    checkByteStream.Add(extractedBytes[i]);
+                }
+            }
+
             // increment file pos by number of bytes read
             filePosition += bytesToExtract;
 
@@ -756,6 +825,15 @@ namespace ReaderWriterTest.iostuff
 
             // extract bytes
             binaryReader.Read(extractedBytes, 0, bytesToExtract);
+
+            // append bytes to check byte stream
+            if (buildingCheckByteStream && checkByteStream != null)
+            {
+                for (int i = 0; i < extractedBytes.Length; i++)
+                {
+                    checkByteStream.Add(extractedBytes[i]);
+                }
+            }
 
             // increment file pos by number of bytes read
             filePosition += bytesToExtract;
@@ -807,6 +885,15 @@ namespace ReaderWriterTest.iostuff
                 binaryReader.BaseStream.Position = bytes;
                 filePosition += bytes;
                 skipped = true;
+            }
+
+            // append bytes to check byte stream
+            if (buildingCheckByteStream && checkByteStream != null)
+            {
+                for (int i = 0; i < bytes; i++)
+                {
+                    checkByteStream.Add(0);
+                }
             }
 
             return skipped;

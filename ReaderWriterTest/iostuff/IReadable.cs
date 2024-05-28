@@ -17,6 +17,28 @@ namespace ReaderWriterTest.iostuff
         public long GetFilePosition();
 
         /// <summary>
+        /// Starts saving a check byte stream that can be used for 
+        /// CRC or other checks.
+        /// </summary>
+        public void BuildCheckByteStream();
+
+        /// <summary>
+        /// Gets the check byte stream that has been saved.
+        /// </summary>
+        /// <returns>the check byte stream.</returns> 
+        public byte[] GetCheckByteStream();
+
+        /// <summary>
+        /// Resets the check byte stream.
+        /// </summary>
+        public void ResetCheckByteStream();
+
+        /// <summary>
+        /// End the check byte stream.
+        /// </summary>
+        public void EndCheckByteStream();
+
+        /// <summary>
         /// Resets the file position.
         /// </summary>
         /// <param name="filePosition">The position to reset to</param>

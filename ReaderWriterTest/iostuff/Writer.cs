@@ -13,13 +13,24 @@ namespace ReaderWriterTest.iostuff
         public static readonly byte[] AND_VALUES = { 0, 1, 3, 7, 15, 31, 63, 127 };
 
         // instance variables
-        private string fileName;            // name of file
-        private bool littleEndian;          // whether to write in little endian
-        private BinaryWriter binaryWriter;  // the binary writer
-        private long filePosition;          // bytes written
-        private byte extraBits;             // extra bits when writing non byte values
-        private byte extraBitCount;         // how many bits are in extra bits
-        private byte leadingBits;           // amount of extra offsetted bits
+        // name of file
+        private string fileName;
+        // whether to write in little endian
+        private bool littleEndian;          
+        // the check byte stream used if a portion of the file is needed
+        private List<byte> checkByteStream;
+        // add bytes to check byte stream if true
+        private bool buildingCheckByteStream;
+        // the binary writer
+        private BinaryWriter binaryWriter;
+        // bytes written
+        private long filePosition;
+        // extra bits when writing non byte values
+        private byte extraBits;
+        // how many bits are in extra bits
+        private byte extraBitCount;
+        // amount of extra offsetted bits
+        private byte leadingBits;           
 
         /// <summary>
         /// The 2-arg consructor for the Writer.
@@ -62,6 +73,51 @@ namespace ReaderWriterTest.iostuff
         public void SetFilePosition(long filePosition)
         {
             FilePosition = filePosition;
+        }
+
+        /// <summary>
+        /// Starts saving a check byte stream that can be used for CRC or other
+        /// checks.
+        /// </summary>
+        public void BuildCheckByteStream()
+        {
+            buildingCheckByteStream = true;
+            checkByteStream = new List<byte>();
+        }
+
+        /// <summary>
+        /// Gets the check byte stream that has been saved.
+        /// </summary>
+        /// <returns>the check byte stream.</returns> 
+        public byte[] GetCheckByteStream()
+        {
+
+            // byte arrary
+            byte[] returnByteStream = new byte[checkByteStream.Count()];
+
+            // build loop
+            for (int i = 0; i < returnByteStream.Length; i++)
+            {
+                returnByteStream[i] = checkByteStream.ElementAt(i);
+            }
+
+            return returnByteStream;
+        }
+
+        /// <summary>
+        /// Resets the check byte stream.
+        /// </summary>
+        public void ResetCheckByteStream()
+        {
+            checkByteStream = new List<byte>();
+        }
+
+        /// <summary>
+        /// End the check byte stream.
+        /// </summary>
+        public void EndCheckByteStream()
+        {
+            buildingCheckByteStream = false;
         }
 
         /// <summary>
@@ -562,10 +618,13 @@ namespace ReaderWriterTest.iostuff
 
             binaryWriter.Write(value);
 
+            if (buildingCheckByteStream && checkByteStream != null)
+            {
+                checkByteStream.Add(value);
+            }
+
             filePosition++;
         }
-
-
 
         /// <summary>
         /// Writes a boolean to file.
@@ -627,6 +686,15 @@ namespace ReaderWriterTest.iostuff
 
             // write the bytes
             binaryWriter.Write(bytesToAppend, start, end);
+
+            // append bytes to check byte stream
+            if (buildingCheckByteStream && checkByteStream != null)
+            {
+                for (int i = start; i < end; i++)
+                {
+                    checkByteStream.Add(bytesToAppend[i]);
+                }
+            }
         }
 
         //  Writes a byte array to the file.
